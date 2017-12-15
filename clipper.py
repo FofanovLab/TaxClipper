@@ -436,6 +436,9 @@ if __name__ =="__main__":
                        help="Path to fasta DB built using build-database flag")
     group.add_argument("-g2t", "--gi-to-taxid-paths", "-gi-to-taxid-paths", nargs='*',
                        help="Path to gi to nucl files")
+    group.add_argument("-fl","--file-list", "-file-list" ,
+                       help="Path to file list of paths to GenBank Flat Files")
+
 
     group.add_argument("-a2t", "--acc-to-taxid-paths", "-acc-to-taxid-paths", nargs='*',
                        help="Path to accesion to nucl file")
@@ -450,6 +453,9 @@ if __name__ =="__main__":
                        help="Integer for maximum length of sequences to include")
     group.add_argument("-rur","--rollup-rank","-rollup-rank",
                        help="NCBI rank to set sequence headers i.e. species, genus, family et cetera")
+
+    group.add_argument("-t", "--threads", "-threads", type=int,
+                       help="Specify total threads to spawn in DB creation")
 
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("-o", "--output","-output",
@@ -469,9 +475,16 @@ if __name__ =="__main__":
         arguments = arg_unwrappers(args)
 
     if args.build_database:
-        build_db("chromosomes.list","chromosome.fasta", "test.kw", "test.src", 16, "test.g2w")
+        if args.threads:
+            threads = args.threads
+        else:
+            threads = 1
+        if args.file_list:
+        # build_db("chromosomes.list","chromosome.fasta", "test.kw", "test.src", 16, "test.g2w")
         # build_db("complete_genome.list","complete.fasta", "test.kw", "test.src", 16, "test.g2w")
-
+            build_db(*"{2} {0}.fasta {0}.kw {0}.src {1} {0}.g2w".format(args.output, threads, args.file_list).split())
+        else:
+            print("FASTA Database creation requires a path to a file list of GenBank Flat Files")
     elif args.build_index_gi:
         if arguments['taxdump-path'] and arguments['fasta-path'] and arguments['gi-to-taxid-path']:
             serialization(arguments['gi-to-taxid-path'],arguments['fasta-path'],arguments['taxdump-path'])
